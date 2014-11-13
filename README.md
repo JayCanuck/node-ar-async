@@ -3,8 +3,7 @@ ar
 
 A Node library for asynchronously reading and writing [Unix archive files](http://en.wikipedia.org/wiki/Ar_%28Unix%29). Currents supprts basic `ar` format, as well as BSD and GNU variants.
 
-ArReader
-======
+###ArReader
 ```javascript
 var ar = require('ar'),
     fs = require('fs'),
@@ -35,8 +34,7 @@ reader.on("close", function() {
 
 ArReader automatically detects and handles BSD and GNU variant formats. All events are optional, so you only have to listen for the ones you want.
 
-ArWriter
-======
+###ArWriter
 ```javascript
 var ar = require('ar'),
     fs = require('fs'),
@@ -69,9 +67,7 @@ writer.on("finish", function() {
 
 ArWriter by default will truncate filenames at 16 bytes long. For long file names, specify a variant format, like done above. Currently "GNU" and "BSD" are supported. Additionally, you can specify "uid", "gid", and "mode" number values in the options json; they will override the values for each file written. All events are optional, so you only have to listen for the ones you want.
 
-ArEntry
-=======
-
+###ArEntry
 See ar.js for inline ArEntry documention, but here are the key APIs
 
 * [ArEntry].fileName() - String - Filename of the file in the entry
@@ -81,3 +77,13 @@ See ar.js for inline ArEntry documention, but here are the key APIs
 * [ArEntry].uid() - Number - UID of the file
 * [ArEntry].gid() - Number - GID of the file
 * [ArEntry].mode() - Number - File mode
+
+###License
+Licensed under the MIT License (MIT)
+
+node-ar-async Copyright (c) 2014 Jason Robitaille.
+https://github.com/JayCanuck/node-ar-async
+
+Based on, and including code from, from node-ar, Copyright (c) 2013 John Vilk.
+https://github.com/jvilk/node-ar
+
