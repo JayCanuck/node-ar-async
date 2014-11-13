@@ -1,0 +1,21 @@
+{
+	"name": "ar-async",
+	"description": "Asynchronously read and write Unix archive files.",
+	"version": "0.1.0",
+	"homepage": "https://github.com/JayCanuck/node-ar-async",
+	"author": {
+		"name": "Jason Robitaille",
+		"email": "jason@canuckcoding.ca"
+	},
+	"licenses": [
+		{
+			"type": "MIT",
+			"url": "https://github.com/JayCanuck/node-ar-async/blob/master/LICENSE"
+		}
+	],
+	"main": "ar.js",
+	"repository": {
+		"type": "git",
+		"url": "https://github.com/JayCanuck/node-ar-async.git"
+	}
+}
