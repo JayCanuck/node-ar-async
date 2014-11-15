@@ -44,6 +44,7 @@ function ArReader(file) {
 					self.emit("error", oErr);
 				} else {
 					self.emit("open");
+					self.fd = fd;
 					var readChunks = function(buf, off, pos, left, cb) {
 						if(pos>=self.size && left>0) {
 							cb();
@@ -69,6 +70,7 @@ function ArReader(file) {
 									if(cErr) {
 										self.emit("error", cErr);
 									}
+									self.fd = undefined;
 									self.emit("close");
 								});
 							} else {
@@ -94,12 +96,11 @@ function ArReader(file) {
 												next();
 											});
 										} else {
-											entry.stream = fs.createReadStream(self.file, {
-												fd: fd,
-												autoClose: false,
+											entry.streamParam = {
+												file: self.file,
 												start: offset+60+bsdNameSize,
 												end: offset+60+entry.dataSize()-1
-											});
+											};
 											self.emit("entry", entry, next);
 										}
 									}
@@ -302,7 +303,22 @@ ArEntry.prototype.totalSize = function () {
 * Returns a *slice* of the backing buffer that has all of the file's data.
 */
 ArEntry.prototype.fileData = function () {
-	return this.stream;
+	if(this.streamParam) {
+		if(this.archive && this.archive.fd!==undefined) {
+			return fs.createReadStream(this.streamParam.file, {
+				fd: this.archive.fd,
+				autoClose: false,
+				start: this.streamParam.start,
+				end: this.streamParam.end
+			});
+		} else {
+			return fs.createReadStream(this.streamParam.file, {
+				start: this.streamParam.start,
+				end: this.streamParam.end
+			});
+		}
+	}
+	
 };
 
 function ArWriter(file, opts) {

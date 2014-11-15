@@ -19,10 +19,10 @@ reader.on("open", function() {
 });
 reader.on("entry", function(entry, next) {
 	// entry is an instance of ArEntry
-	fs.writeFile(path.join(outputDir, entry.fileName()), entry.fileData(), function() {
-		if (err) throw err;
-		next();
-	});
+	var name = entry.fileName();
+	entry.fileData()
+		.pipe(fs.createWriteStream(name))
+		.on("finish", next);		
 });
 reader.on("error", function(err) {
 	// archive reading error
@@ -76,7 +76,7 @@ See ar.js for inline ArEntry documention, but here are the key APIs
 
 * [ArEntry].fileName() - String - Filename of the file in the entry
 * [ArEntry].fileSize() - Number - Number of bytes the file takes up
-* [ArEntry].fileData() - Buffer - Data buffer for file data
+* [ArEntry].fileData() - Stream - Readable stream for file data
 * [ArEntry].date() - Date - Last modified date of the file
 * [ArEntry].uid() - Number - UID of the file
 * [ArEntry].gid() - Number - GID of the file
