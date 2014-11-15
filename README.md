@@ -17,9 +17,12 @@ var reader = new ar.ArReader("some_archive.a");
 reader.on("open", function() {
 	// archive opened
 });
-reader.on("entry", function(entry) {
+reader.on("entry", function(entry, next) {
 	// entry is an instance of ArEntry
-	fs.writeFileSync(path.join(outputDir, entry.fileName()), entry.fileData());
+	fs.writeFile(path.join(outputDir, entry.fileName()), entry.fileData(), function() {
+		if (err) throw err;
+		next();
+	});
 });
 reader.on("error", function(err) {
 	// archive reading error
@@ -56,6 +59,7 @@ writer.on("open", function() {
 writer.on("entry", function(entry) {
 	// entry is an instance of ArEntry
 	// signifies an entry has been written
+	// unlike ArReader, there is no next function
 });
 writer.on("error", function(err) {
 	// archive writing error

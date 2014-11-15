@@ -77,14 +77,21 @@ function ArReader(file) {
 								readChunks(new Buffer(size), 0, offset+60, size, function(data) {
 									if(data) {
 										entry.data = data;
+										var nextOffset = entry.totalSize()+offset;
+										var nexted = false;
+										var next = function() {
+											if(!nexted) { //prevent repeat calls
+												entry = undefined;
+												readEntry(nextOffset);
+												nexted = true;
+											}
+										};
 										if(entry.name()==="//") {
 											self.gnuEntry = entry;
+											next();
 										} else {
-											self.emit("entry", entry);
+											self.emit("entry", entry, next);
 										}
-										var nextOffset = entry.totalSize()+offset;
-										entry = undefined;
-										readEntry(nextOffset);
 									}
 								});
 							}
