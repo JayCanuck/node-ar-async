@@ -400,7 +400,7 @@ ArWriter.prototype.writeEntries = function(entries, callback) {
 								self.emit("error", cwErr);
 							} else {
 								self.emit("finish");
-								callback();
+								callback && callback();
 							}
 						});
 					};
