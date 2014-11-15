@@ -73,10 +73,10 @@ function ArReader(file) {
 								});
 							} else {
 								var entry = new ArEntry(header, self);
-								var size = entry.dataSize();
-								readChunks(new Buffer(size), 0, offset+60, size, function(data) {
-									if(data) {
-										entry.data = data;
+								var bsdNameSize = entry.nameSizeBSD();
+								readChunks(new Buffer(bsdNameSize), 0, offset+60, bsdNameSize, function(bsdNameData) {
+									if(bsdNameData) {
+										entry.bsdName = trimNulls(bsdNameData.toString('utf8', 0, bsdNameSize));
 										var nextOffset = entry.totalSize()+offset;
 										var nexted = false;
 										var next = function() {
@@ -88,8 +88,18 @@ function ArReader(file) {
 										};
 										if(entry.name()==="//") {
 											self.gnuEntry = entry;
-											next();
+											var size = entry.fileSize();
+											readChunks(new Buffer(size), 0, offset+60+bsdNameSize, size, function(gnuData) {
+												self.gnuEntry.data = gnuData;
+												next();
+											});
 										} else {
+											entry.stream = fs.createReadStream(self.file, {
+												fd: fd,
+												autoClose: false,
+												start: offset+60+bsdNameSize,
+												end: offset+60+entry.dataSize()-1
+											});
 											self.emit("entry", entry, next);
 										}
 									}
@@ -113,7 +123,7 @@ ArReader.prototype.resolveNameGNU = function(shortName) {
 	if(this.isGNU()) {
 		try {
 			var start = parseInt(shortName.replace("/", ""), 10);
-			var resolved = this.gnuEntry.fileData().toString('ascii', start);
+			var resolved = this.gnuEntry.data.toString('utf8', start);
 			return resolved.substring(0, resolved.indexOf("\n"));
 		} catch(e) {
 			return shortName;
@@ -209,7 +219,7 @@ ArEntry.prototype.realName = function () {
 		var length = this.nameSizeBSD();
         // Unfortunately, even though they give us the *explicit length*, they add
         // NULL bytes and include that in the length, so we must strip them out.
-        name = trimNulls(this.data.toString('utf8', 0, length));
+        name = this.bsdName;
 	} else if(this.archive && this.archive.isGNU() && name.indexOf("/")===0) {
 		name = this.archive.resolveNameGNU(name);
 	}
@@ -292,8 +302,7 @@ ArEntry.prototype.totalSize = function () {
 * Returns a *slice* of the backing buffer that has all of the file's data.
 */
 ArEntry.prototype.fileData = function () {
-	var headerSize = this.headerSize(), bsdOffset = this.nameSizeBSD();
-	return this.data.slice(bsdOffset, headerSize + this.dataSize());
+	return this.stream;
 };
 
 function ArWriter(file, opts) {
