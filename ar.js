@@ -446,12 +446,16 @@ ArWriter.prototype.writeEntries = function(entries, callback) {
 								gnuContent += base + "\n";
 							}
 						}
-						var gnuHeader = buildHeader("//", "", "", "", "", gnuContent.length + "");
-						self.gnuEntry = new ArEntry(gnuHeader, self);
-						self.gnuEntry.data = new Buffer(gnuContent);
-						writeEntry(self.gnuEntry, 8, function(newOffset) {
-							processFile(entries, newOffset, finished);
-						});
+						if(Object.keys(self.gnuMap).length>0) {
+							var gnuHeader = buildHeader("//", "", "", "", "", gnuContent.length + "");
+							self.gnuEntry = new ArEntry(gnuHeader, self);
+							self.gnuEntry.data = new Buffer(gnuContent);
+							writeEntry(self.gnuEntry, 8, function(newOffset) {
+								processFile(entries, newOffset, finished);
+							});
+						} else {
+							processFile(entries, 8, finished);
+						}
 					} else {
 						processFile(entries, 8, finished);
 					}
